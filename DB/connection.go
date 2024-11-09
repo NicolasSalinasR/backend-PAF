@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/NicolasSalinasR/backend-PAF/models"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -18,5 +19,12 @@ func DBconnection() {
 	if err != nil {
 		log.Fatalf("Error al conectar a la base de datos: %v", err)
 	}
+
+	// Migrar el modelo (crear la tabla si no existe)
+	err = DB.AutoMigrate(models.PAF{})
+	if err != nil {
+		panic("failed to migrate the database")
+	}
 	fmt.Println("Conexión a la base de datos exitosa.")
+
 }
