@@ -5,8 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"Backend-PAF/DB"
-
+	"github.com/NicolasSalinasR/Backend-PAF/DB"
 	"github.com/gorilla/mux"
 )
 
