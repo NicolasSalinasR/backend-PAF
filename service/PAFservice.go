@@ -86,3 +86,12 @@ func (s *PAFService) EliminarPAF(id uint) error {
 	}
 	return nil
 }
+
+// ObtenerPAFsPorNombreProfesor obtiene todos los registros de PAF filtrados por el nombre del profesor
+func (s *PAFService) ObtenerPAFsPorNombreProfesor(nombreProfesor string) ([]models.PAF, error) {
+	var pAFs []models.PAF
+	if err := DB.DB.Where("nombre_profesor = ?", nombreProfesor).Find(&pAFs).Error; err != nil {
+		return nil, err
+	}
+	return pAFs, nil
+}

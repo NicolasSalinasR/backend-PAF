@@ -132,3 +132,24 @@ func (c *PAFController) EliminarPAF(w http.ResponseWriter, r *http.Request) {
 	// Enviar una respuesta vacía indicando que el PAF fue eliminado
 	w.WriteHeader(http.StatusNoContent)
 }
+
+// ObtenerPAFsPorNombreProfesor maneja la solicitud GET para obtener PAFs filtrados por nombre del profesor
+func (c *PAFController) ObtenerPAFsPorNombreProfesor(w http.ResponseWriter, r *http.Request) {
+	// Obtener el nombre del profesor del query string
+	nombreProfesor := r.URL.Query().Get("nombre_profesor")
+	if nombreProfesor == "" {
+		http.Error(w, "El parámetro 'nombre_profesor' es obligatorio", http.StatusBadRequest)
+		return
+	}
+
+	// Obtener los PAFs filtrados
+	pafs, err := c.PafService.ObtenerPAFsPorNombreProfesor(nombreProfesor)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Respondemos con los resultados en formato JSON
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(pafs)
+}

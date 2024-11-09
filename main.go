@@ -24,12 +24,19 @@ func main() {
 
 	// Definir las rutas del controlador
 	r.HandleFunc("/paf", pafController.CrearPAF).Methods("POST")
+	//Filtro Por Id PAF
 	r.HandleFunc("/paf/{id:[0-9]+}", pafController.ObtenerPAF).Methods("GET")
+	//Obtiene todas las PAFS
 	r.HandleFunc("/pafs", pafController.ObtenerTodosPAFs).Methods("GET")
+	//Actualiza la PAF del id ingresado
 	r.HandleFunc("/paf/{id:[0-9]+}", pafController.ActualizarPAF).Methods("PUT")
+	//Elimina una PAF
 	r.HandleFunc("/paf/{id:[0-9]+}", pafController.EliminarPAF).Methods("DELETE")
 
+	// Ruta para filtrar por nombre del profesor
+	r.HandleFunc("/pafs/buscarNombre", pafController.ObtenerPAFsPorNombreProfesor).Methods("GET")
+
 	// Iniciar el servidor
-	log.Println("Servidor escuchando en el puerto 8080...")
-	log.Fatal(http.ListenAndServe(":8080", r))
+	log.Println("Servidor escuchando en el puerto 3000...")
+	log.Fatal(http.ListenAndServe(":3000", r))
 }
