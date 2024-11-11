@@ -27,4 +27,12 @@ func DBconnection() {
 	}
 	fmt.Println("Conexión a la base de datos exitosa.")
 
+	// Realizar la migración automática para crear las tablas
+	err = DB.AutoMigrate(&models.Profesor{})
+	if err != nil {
+		log.Fatalf("Error al migrar la base de datos: %v", err)
+	} else {
+		log.Println("Migración realizada correctamente")
+	}
+
 }
