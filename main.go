@@ -13,28 +13,31 @@ import (
 func main() {
 	// Conectar a la base de datos
 	DB.DBconnection()
+
 	// Creamos una instancia del servicio
 	pafService := service.NewPAFService()
+	profesorService := service.NewProfesorService(DB.DB)
 
 	// Creamos una instancia del controlador
 	pafController := controller.NewPAFController(pafService)
+	profesorController := controller.NewProfesorController(profesorService)
 
 	// Configuramos el enrutador
 	r := mux.NewRouter()
 
-	// Definir las rutas del controlador
+	// Definir las rutas del controlador para PAF
 	r.HandleFunc("/paf", pafController.CrearPAF).Methods("POST")
-	//Filtro Por Id PAF
 	r.HandleFunc("/paf/{id:[0-9]+}", pafController.ObtenerPAF).Methods("GET")
-	//Obtiene todas las PAFS
 	r.HandleFunc("/pafs", pafController.ObtenerTodosPAFs).Methods("GET")
-	//Actualiza la PAF del id ingresado
 	r.HandleFunc("/paf/{id:[0-9]+}", pafController.ActualizarPAF).Methods("PUT")
-	//Elimina una PAF
 	r.HandleFunc("/paf/{id:[0-9]+}", pafController.EliminarPAF).Methods("DELETE")
 
-	// Ruta para filtrar por nombre del profesor
-	r.HandleFunc("/pafs/buscarNombre", pafController.ObtenerPAFsPorNombreProfesor).Methods("GET")
+	// Definir las rutas del controlador para Profesores
+	r.HandleFunc("/profesores", profesorController.CrearProfesor).Methods("POST")
+	r.HandleFunc("/profesores/{id:[0-9]+}", profesorController.ObtenerProfesor).Methods("GET")
+	r.HandleFunc("/profesores", profesorController.ObtenerTodosProfesores).Methods("GET")
+	r.HandleFunc("/profesores/{id:[0-9]+}", profesorController.ActualizarProfesor).Methods("PUT")
+	r.HandleFunc("/profesores/{id:[0-9]+}", profesorController.EliminarProfesor).Methods("DELETE")
 
 	// Iniciar el servidor
 	log.Println("Servidor escuchando en el puerto 3000...")

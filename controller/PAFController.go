@@ -10,146 +10,133 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// PAFController define las operaciones HTTP sobre PAF
+// PAFController maneja las solicitudes HTTP para los PAFs
 type PAFController struct {
-	PafService *service.PAFService
+	PAFService *service.PAFService
 }
 
-// NewPAFController crea una nueva instancia del controlador
-func NewPAFController(pafService *service.PAFService) *PAFController {
-	return &PAFController{PafService: pafService}
+// NewPAFController crea una nueva instancia de PAFController
+func NewPAFController() *PAFController {
+	return &PAFController{
+		PAFService: service.NewPAFService(),
+	}
 }
 
 // CrearPAF maneja la creación de un nuevo PAF
 func (c *PAFController) CrearPAF(w http.ResponseWriter, r *http.Request) {
 	var paf models.PAF
-	// Decodificar el cuerpo de la solicitud (JSON)
+	// Decodificar el cuerpo de la solicitud en un objeto PAF
 	if err := json.NewDecoder(r.Body).Decode(&paf); err != nil {
-		http.Error(w, "Error al leer los datos del cuerpo de la solicitud", http.StatusBadRequest)
+		http.Error(w, "Error al leer los datos del PAF", http.StatusBadRequest)
 		return
 	}
 
 	// Llamar al servicio para crear el PAF
-	createdPAF, err := c.PafService.CrearPAF(&paf)
+	createdPAF, err := c.PAFService.CrearPAF(&paf)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusConflict)
 		return
 	}
 
-	// Enviar una respuesta con el PAF creado
-	w.Header().Set("Content-Type", "application/json")
+	// Responder con el PAF creado
 	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(createdPAF); err != nil {
-		http.Error(w, "Error al codificar la respuesta", http.StatusInternalServerError)
-	}
+	json.NewEncoder(w).Encode(createdPAF)
 }
 
 // ObtenerPAF maneja la obtención de un PAF por ID
 func (c *PAFController) ObtenerPAF(w http.ResponseWriter, r *http.Request) {
-	// Obtener el parámetro ID de la URL
-	idParam := mux.Vars(r)["id"]
-	id, err := strconv.ParseUint(idParam, 10, 32)
+	// Obtener el ID del PAF desde los parámetros de la URL
+	idStr := mux.Vars(r)["id"]
+	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
 		http.Error(w, "ID inválido", http.StatusBadRequest)
 		return
 	}
 
 	// Llamar al servicio para obtener el PAF
-	paf, err := c.PafService.ObtenerPAF(uint(id))
+	paf, err := c.PAFService.ObtenerPAF(uint(id))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	// Enviar la respuesta con el PAF
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(paf); err != nil {
-		http.Error(w, "Error al codificar la respuesta", http.StatusInternalServerError)
-	}
+	// Responder con el PAF encontrado
+	json.NewEncoder(w).Encode(paf)
 }
 
 // ObtenerTodosPAFs maneja la obtención de todos los PAFs
 func (c *PAFController) ObtenerTodosPAFs(w http.ResponseWriter, r *http.Request) {
 	// Llamar al servicio para obtener todos los PAFs
-	pafs, err := c.PafService.ObtenerTodosPAFs()
+	pafs, err := c.PAFService.ObtenerTodosPAFs()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Enviar la respuesta con la lista de PAFs
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(pafs); err != nil {
-		http.Error(w, "Error al codificar la respuesta", http.StatusInternalServerError)
-	}
+	// Responder con la lista de PAFs
+	json.NewEncoder(w).Encode(pafs)
 }
 
-// ActualizarPAF maneja la actualización de un PAF por ID
+// ActualizarPAF maneja la actualización de un PAF
 func (c *PAFController) ActualizarPAF(w http.ResponseWriter, r *http.Request) {
-	idParam := mux.Vars(r)["id"]
-	id, err := strconv.ParseUint(idParam, 10, 32)
+	// Obtener el ID del PAF desde los parámetros de la URL
+	idStr := mux.Vars(r)["id"]
+	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
 		http.Error(w, "ID inválido", http.StatusBadRequest)
 		return
 	}
 
 	var paf models.PAF
-	// Decodificar el cuerpo de la solicitud (JSON)
+	// Decodificar el cuerpo de la solicitud en un objeto PAF
 	if err := json.NewDecoder(r.Body).Decode(&paf); err != nil {
-		http.Error(w, "Error al leer los datos del cuerpo de la solicitud", http.StatusBadRequest)
+		http.Error(w, "Error al leer los datos del PAF", http.StatusBadRequest)
 		return
 	}
 
 	// Llamar al servicio para actualizar el PAF
-	updatedPAF, err := c.PafService.ActualizarPAF(uint(id), &paf)
+	updatedPAF, err := c.PAFService.ActualizarPAF(uint(id), &paf)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	// Enviar la respuesta con el PAF actualizado
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(updatedPAF); err != nil {
-		http.Error(w, "Error al codificar la respuesta", http.StatusInternalServerError)
-	}
+	// Responder con el PAF actualizado
+	json.NewEncoder(w).Encode(updatedPAF)
 }
 
 // EliminarPAF maneja la eliminación de un PAF por ID
 func (c *PAFController) EliminarPAF(w http.ResponseWriter, r *http.Request) {
-	idParam := mux.Vars(r)["id"]
-	id, err := strconv.ParseUint(idParam, 10, 32)
+	// Obtener el ID del PAF desde los parámetros de la URL
+	idStr := mux.Vars(r)["id"]
+	id, err := strconv.ParseUint(idStr, 10, 32)
 	if err != nil {
 		http.Error(w, "ID inválido", http.StatusBadRequest)
 		return
 	}
 
 	// Llamar al servicio para eliminar el PAF
-	if err := c.PafService.EliminarPAF(uint(id)); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	err = c.PAFService.EliminarPAF(uint(id))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	// Enviar una respuesta vacía indicando que el PAF fue eliminado
+	// Responder con éxito
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// ObtenerPAFsPorNombreProfesor maneja la solicitud GET para obtener PAFs filtrados por nombre del profesor
+// ObtenerPAFsPorNombreProfesor maneja la obtención de los PAFs por el nombre del profesor
 func (c *PAFController) ObtenerPAFsPorNombreProfesor(w http.ResponseWriter, r *http.Request) {
-	// Obtener el nombre del profesor del query string
-	nombreProfesor := r.URL.Query().Get("nombre_profesor")
-	if nombreProfesor == "" {
-		http.Error(w, "El parámetro 'nombre_profesor' es obligatorio", http.StatusBadRequest)
-		return
-	}
+	nombreProfesor := mux.Vars(r)["nombreProfesor"]
 
-	// Obtener los PAFs filtrados
-	pafs, err := c.PafService.ObtenerPAFsPorNombreProfesor(nombreProfesor)
+	// Llamar al servicio para obtener los PAFs por el nombre del profesor
+	pafs, err := c.PAFService.ObtenerPAFsPorNombreProfesor(nombreProfesor)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Respondemos con los resultados en formato JSON
-	w.Header().Set("Content-Type", "application/json")
+	// Responder con los PAFs encontrados
 	json.NewEncoder(w).Encode(pafs)
 }
